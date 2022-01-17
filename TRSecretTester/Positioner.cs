@@ -1,0 +1,270 @@
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using TRFDControl;
+using TRFDControl.FDEntryTypes;
+using TRFDControl.Utilities;
+using TRLevelReader;
+using TRLevelReader.Helpers;
+using TRLevelReader.Model;
+using TRLevelReader.Model.Enums;
+using TRRandomizerCore.Helpers;
+
+namespace TRSecretTester
+{
+    public class Positioner
+    {
+        private static readonly ushort _allFlagBits = 0x3E00;
+        private static readonly List<FDTrigAction> _removeTriggerActions = new List<FDTrigAction>
+        {
+            FDTrigAction.LookAtItem, FDTrigAction.Object
+        };
+
+        public enum StartPosition
+        {
+            Default,
+            Entity,
+            Custom
+        };
+
+        public string DataFolder { get; set; }
+        public string LevelName { get; set; }
+        public bool LimitEntities { get; set; }
+        public int EntityLimit { get; set; }
+        public bool MoveKeyItems { get; set; }
+        public bool MovePuzzleItems { get; set; }
+        public bool OpenDoors { get; set; }
+        public StartPosition StartPos { get; set; }
+        public int MatchEntityPosition { get; set; }
+        public Location LaraCustomLocation { get; set; }
+
+        private Config _config;
+
+        public void Save()
+        {
+            _config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("TRSecretTester.json"));
+
+            string lvlPath = Path.Combine(DataFolder, LevelName);
+            if (_config.IsTR2Level(LevelName))
+            {
+                TR2Level level = new TR2LevelReader().ReadLevel(lvlPath);
+                Save(level);
+                new TR2LevelWriter().WriteLevelToFile(level, lvlPath);
+            }
+            else if (_config.IsTR3Level(LevelName))
+            {
+                TR3Level level = new TR3LevelReader().ReadLevel(lvlPath);
+                Save(level);
+                new TR3LevelWriter().WriteLevelToFile(level, lvlPath);
+            }
+            else
+            {
+                throw new ArgumentException("Unrecognised level");
+            }
+        }
+
+        private void Save(TR2Level level)
+        {
+            List<TR2Entity> entities = level.Entities.ToList();
+            MoveLara(entities, _config.TR2LaraPositions[LevelName]);
+
+            if (LimitEntities)
+            {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
+
+                LimitLevelEntities(entities, _config.TR2EntityRemovals, floorData);
+                level.Entities = entities.ToArray();
+                level.NumEntities = (uint)entities.Count;
+                floorData.WriteToLevel(level);
+            }
+
+            if (MoveKeyItems)
+            {
+                TR2Entity lara = Array.Find(level.Entities, e => e.TypeID == (short)TR2Entities.Lara);
+                foreach (TR2Entity ent in level.Entities)
+                {
+                    if (TR2EntityUtilities.IsKeyItemType((TR2Entities)ent.TypeID))
+                    {
+                        ent.X = lara.X;
+                        ent.Y = lara.Y;
+                        ent.Z = lara.Z;
+                        ent.Room = lara.Room;
+                        ent.Flags = _allFlagBits;
+                    }
+                }
+            }
+
+            if (OpenDoors)
+            {
+                bool pred(TR2Entity e) =>
+                    TR2EntityUtilities.IsDoorType((TR2Entities)e.TypeID) ||
+                    (TR2Entities)e.TypeID == TR2Entities.Trapdoor1 ||
+                    (TR2Entities)e.TypeID == TR2Entities.Trapdoor2 ||
+                    (TR2Entities)e.TypeID == TR2Entities.Trapdoor3;
+
+                foreach (TR2Entity door in Array.FindAll(level.Entities, pred))
+                {
+                    door.Flags = _allFlagBits;
+                }
+            }
+        }
+
+        private void Save(TR3Level level)
+        {
+            List<TR2Entity> entities = level.Entities.ToList();
+            MoveLara(entities, _config.TR3LaraPositions[LevelName]);
+
+            if (LimitEntities)
+            {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
+
+                LimitLevelEntities(entities, _config.TR3EntityRemovals, floorData);
+                level.Entities = entities.ToArray();
+                level.NumEntities = (uint)entities.Count;
+                floorData.WriteToLevel(level);
+            }
+
+            if (MoveKeyItems || MovePuzzleItems)
+            {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
+                TR2Entity lara = Array.Find(level.Entities, e => e.TypeID == (short)TR3Entities.Lara);
+                for (int i = 0; i < level.NumEntities; i++)
+                {
+                    TR2Entity ent = level.Entities[i];
+                    TR3Entities type = (TR3Entities)ent.TypeID;
+                    if ((MoveKeyItems && TR3EntityUtilities.IsKeyItemType(type)) || (MovePuzzleItems && TR3EntityUtilities.IsPuzzleType(type)))
+                    {
+                        if (!IsTR3Secret(ent, i, level, floorData))
+                        {
+                            ent.X = lara.X;
+                            ent.Y = lara.Y;
+                            ent.Z = lara.Z;
+                            ent.Room = lara.Room;
+                            ent.Flags = _allFlagBits;
+                        }
+                    }
+                }
+            }
+
+            if (OpenDoors)
+            {
+                foreach (TR2Entity door in Array.FindAll(level.Entities, e => TR3EntityUtilities.IsTrapdoor((TR3Entities)e.TypeID) || TR3EntityUtilities.IsDoorType((TR3Entities)e.TypeID)))
+                {
+                    door.Flags = _allFlagBits;
+                }
+            }
+        }
+        
+        private bool IsTR3Secret(TR2Entity entity, int entityIndex, TR3Level level, FDControl floorData)
+        {
+            Predicate<FDEntry> pred = new Predicate<FDEntry>
+            (
+                e =>
+                    e is FDTriggerEntry trig && trig.TrigType == FDTrigType.Pickup
+                 && trig.TrigActionList.Count > 1
+                 && trig.TrigActionList[0].TrigAction == FDTrigAction.Object
+                 && trig.TrigActionList[1].TrigAction == FDTrigAction.SecretFound
+            );
+
+            TRRoomSector sector = FDUtilities.GetRoomSector(entity.X, entity.Y, entity.Z, entity.Room, level, floorData);
+            if (sector.FDIndex != 0)
+            {
+                if (floorData.Entries[sector.FDIndex].Find(pred) is FDTriggerEntry trigger && trigger.TrigActionList[0].Parameter == entityIndex)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void MoveLara(List<TR2Entity> entities, Location defaultLocation)
+        {
+            TR2Entity lara = entities.Find(e => e.TypeID == (short)TR2Entities.Lara);
+
+            if (StartPos == StartPosition.Default)
+            {
+                lara.X = defaultLocation.X;
+                lara.Y = defaultLocation.Y;
+                lara.Z = defaultLocation.Z;
+                lara.Room = (short)defaultLocation.Room;
+            }
+            else if (StartPos == StartPosition.Custom)
+            {
+                lara.X = LaraCustomLocation.X;
+                lara.Y = LaraCustomLocation.Y;
+                lara.Z = LaraCustomLocation.Z;
+                lara.Room = (short)LaraCustomLocation.Room;
+            }
+            else
+            {
+                TR2Entity otherPos = entities[MatchEntityPosition];
+                lara.X = otherPos.X;
+                lara.Y = otherPos.Y;
+                lara.Z = otherPos.Z;
+                lara.Room = otherPos.Room;
+            }
+        }
+
+        private void LimitLevelEntities(List<TR2Entity> entities, List<short> removeTypes, FDControl floorData)
+        {
+            if (LimitEntities && entities.Count > EntityLimit)
+            {
+                Dictionary<int, TR2Entity> oldPositions = new Dictionary<int, TR2Entity>();
+                Dictionary<TR2Entity, int> newPositions = new Dictionary<TR2Entity, int>();
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    oldPositions[i] = entities[i];
+                }
+
+                for (int i = entities.Count - 1; i >= 0; i--)
+                {
+                    if (entities.Count <= EntityLimit)
+                    {
+                        break;
+                    }
+
+                    if (removeTypes.Contains(entities[i].TypeID))
+                    {
+                        entities.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    newPositions[entities[i]] = i;
+                }
+
+                foreach (List<FDEntry> entryList in floorData.Entries.Values)
+                {
+                    foreach (FDEntry entry in entryList)
+                    {
+                        if (entry is FDTriggerEntry trigger)
+                        {
+                            for (int i = trigger.TrigActionList.Count - 1; i >= 0; i--)
+                            {
+                                FDActionListItem action = trigger.TrigActionList[i];
+                                if (_removeTriggerActions.Contains(action.TrigAction) && oldPositions.ContainsKey(action.Parameter))
+                                {
+                                    if (newPositions.ContainsKey(oldPositions[action.Parameter]))
+                                    {
+                                        action.Parameter = (ushort)newPositions[oldPositions[action.Parameter]];
+                                    }
+                                    else
+                                    {
+                                        trigger.TrigActionList.RemoveAt(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
