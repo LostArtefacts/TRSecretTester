@@ -30,15 +30,15 @@ namespace TRSecretTester
                     {
                         string fileName = Path.GetFileName(file).ToUpper();
                         if (fileName.Equals(TR2LevelNames.HOME)) continue; // ambiguous between TR2/3
-                        if (TR2LevelNames.AsList.Contains(fileName))
+                        if (TR2LevelNames.AsListWithAssault.Contains(fileName))
                         {
-                            levelComboBox.Items.AddRange(TR2LevelNames.AsList.ToArray());
+                            levelComboBox.Items.AddRange(TR2LevelNames.AsListWithAssault.ToArray());
                             levelComboBox.SelectedIndex = 0;
                             break;
                         }
-                        else if (TR3LevelNames.AsList.Contains(fileName))
+                        else if (TR3LevelNames.AsListWithAssault.Contains(fileName))
                         {
-                            levelComboBox.Items.AddRange(TR3LevelNames.AsList.ToArray());
+                            levelComboBox.Items.AddRange(TR3LevelNames.AsListWithAssault.ToArray());
                             levelComboBox.SelectedIndex = 0;
                             break;
                         }
@@ -141,6 +141,7 @@ namespace TRSecretTester
                 MoveKeyItems = keyItemCheck.Checked,
                 MovePuzzleItems = puzzlesCheck.Checked,
                 OpenDoors = openDoorsCheck.Checked,
+                AddFlares = addFlaresCheck.Checked,
                 StartPos = startPos,
                 MatchEntityPosition = Convert.ToInt32(entityPosSpinner.Value),
                 LaraCustomLocation = laraLocation

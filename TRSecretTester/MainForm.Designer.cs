@@ -53,6 +53,7 @@ namespace TRSecretTester
             this.keyItemCheck = new System.Windows.Forms.CheckBox();
             this.openDoorsCheck = new System.Windows.Forms.CheckBox();
             this.puzzlesCheck = new System.Windows.Forms.CheckBox();
+            this.addFlaresCheck = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.laraRoomSpinner)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.entityPosSpinner)).BeginInit();
@@ -74,14 +75,14 @@ namespace TRSecretTester
             this.dataFolderTextBox.Location = new System.Drawing.Point(80, 12);
             this.dataFolderTextBox.Name = "dataFolderTextBox";
             this.dataFolderTextBox.Size = new System.Drawing.Size(369, 20);
-            this.dataFolderTextBox.TabIndex = 0;
+            this.dataFolderTextBox.TabIndex = 1;
             // 
             // browseButton
             // 
             this.browseButton.Location = new System.Drawing.Point(460, 11);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(75, 23);
-            this.browseButton.TabIndex = 1;
+            this.browseButton.TabIndex = 2;
             this.browseButton.Text = "&Browse";
             this.browseButton.UseVisualStyleBackColor = true;
             this.browseButton.Click += new System.EventHandler(this.BrowseButton_Click);
@@ -102,7 +103,7 @@ namespace TRSecretTester
             this.levelComboBox.Location = new System.Drawing.Point(80, 43);
             this.levelComboBox.Name = "levelComboBox";
             this.levelComboBox.Size = new System.Drawing.Size(202, 21);
-            this.levelComboBox.TabIndex = 2;
+            this.levelComboBox.TabIndex = 4;
             // 
             // label3
             // 
@@ -111,7 +112,7 @@ namespace TRSecretTester
             this.label3.Location = new System.Drawing.Point(12, 157);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(28, 13);
-            this.label3.TabIndex = 11;
+            this.label3.TabIndex = 12;
             this.label3.Text = "Lara";
             // 
             // label4
@@ -120,7 +121,7 @@ namespace TRSecretTester
             this.label4.Location = new System.Drawing.Point(12, 75);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(43, 13);
-            this.label4.TabIndex = 12;
+            this.label4.TabIndex = 5;
             this.label4.Text = "Options";
             // 
             // laraEntityPosRadioButton
@@ -152,7 +153,7 @@ namespace TRSecretTester
             this.xyzLabel.Location = new System.Drawing.Point(21, 77);
             this.xyzLabel.Name = "xyzLabel";
             this.xyzLabel.Size = new System.Drawing.Size(40, 13);
-            this.xyzLabel.TabIndex = 16;
+            this.xyzLabel.TabIndex = 4;
             this.xyzLabel.Text = "X, Y, Z";
             // 
             // laraPosTextBox
@@ -161,7 +162,7 @@ namespace TRSecretTester
             this.laraPosTextBox.Location = new System.Drawing.Point(83, 73);
             this.laraPosTextBox.Name = "laraPosTextBox";
             this.laraPosTextBox.Size = new System.Drawing.Size(195, 20);
-            this.laraPosTextBox.TabIndex = 4;
+            this.laraPosTextBox.TabIndex = 5;
             // 
             // roomLabel
             // 
@@ -170,7 +171,7 @@ namespace TRSecretTester
             this.roomLabel.Location = new System.Drawing.Point(21, 99);
             this.roomLabel.Name = "roomLabel";
             this.roomLabel.Size = new System.Drawing.Size(35, 13);
-            this.roomLabel.TabIndex = 18;
+            this.roomLabel.TabIndex = 6;
             this.roomLabel.Text = "Room";
             // 
             // laraRoomSpinner
@@ -184,7 +185,7 @@ namespace TRSecretTester
             0});
             this.laraRoomSpinner.Name = "laraRoomSpinner";
             this.laraRoomSpinner.Size = new System.Drawing.Size(90, 20);
-            this.laraRoomSpinner.TabIndex = 5;
+            this.laraRoomSpinner.TabIndex = 7;
             // 
             // saveButton
             // 
@@ -192,7 +193,7 @@ namespace TRSecretTester
             this.saveButton.Location = new System.Drawing.Point(460, 253);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 21);
-            this.saveButton.TabIndex = 7;
+            this.saveButton.TabIndex = 15;
             this.saveButton.Text = "&Save";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
@@ -206,7 +207,7 @@ namespace TRSecretTester
             this.doneLabel.Location = new System.Drawing.Point(475, 230);
             this.doneLabel.Name = "doneLabel";
             this.doneLabel.Size = new System.Drawing.Size(41, 13);
-            this.doneLabel.TabIndex = 21;
+            this.doneLabel.TabIndex = 14;
             this.doneLabel.Text = "Done!";
             this.doneLabel.Visible = false;
             // 
@@ -224,7 +225,7 @@ namespace TRSecretTester
             this.panel1.Location = new System.Drawing.Point(80, 154);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(291, 119);
-            this.panel1.TabIndex = 22;
+            this.panel1.TabIndex = 13;
             // 
             // entityPosSpinner
             // 
@@ -260,7 +261,7 @@ namespace TRSecretTester
             this.limitEntitiesCheck.Location = new System.Drawing.Point(80, 75);
             this.limitEntitiesCheck.Name = "limitEntitiesCheck";
             this.limitEntitiesCheck.Size = new System.Drawing.Size(135, 17);
-            this.limitEntitiesCheck.TabIndex = 3;
+            this.limitEntitiesCheck.TabIndex = 6;
             this.limitEntitiesCheck.Text = "Ensure entity count <= ";
             this.limitEntitiesCheck.UseVisualStyleBackColor = true;
             this.limitEntitiesCheck.CheckedChanged += new System.EventHandler(this.LimitEntitiesCheck_CheckedChanged);
@@ -280,7 +281,7 @@ namespace TRSecretTester
             0});
             this.maxEntitiesSpinner.Name = "maxEntitiesSpinner";
             this.maxEntitiesSpinner.Size = new System.Drawing.Size(65, 20);
-            this.maxEntitiesSpinner.TabIndex = 4;
+            this.maxEntitiesSpinner.TabIndex = 7;
             this.maxEntitiesSpinner.Value = new decimal(new int[] {
             256,
             0,
@@ -293,7 +294,7 @@ namespace TRSecretTester
             this.keyItemCheck.Location = new System.Drawing.Point(80, 99);
             this.keyItemCheck.Name = "keyItemCheck";
             this.keyItemCheck.Size = new System.Drawing.Size(136, 17);
-            this.keyItemCheck.TabIndex = 5;
+            this.keyItemCheck.TabIndex = 8;
             this.keyItemCheck.Text = "Move key items to Lara";
             this.keyItemCheck.UseVisualStyleBackColor = true;
             // 
@@ -303,7 +304,7 @@ namespace TRSecretTester
             this.openDoorsCheck.Location = new System.Drawing.Point(80, 123);
             this.openDoorsCheck.Name = "openDoorsCheck";
             this.openDoorsCheck.Size = new System.Drawing.Size(94, 17);
-            this.openDoorsCheck.TabIndex = 6;
+            this.openDoorsCheck.TabIndex = 10;
             this.openDoorsCheck.Text = "Open all doors";
             this.openDoorsCheck.UseVisualStyleBackColor = true;
             // 
@@ -313,9 +314,19 @@ namespace TRSecretTester
             this.puzzlesCheck.Location = new System.Drawing.Point(217, 99);
             this.puzzlesCheck.Name = "puzzlesCheck";
             this.puzzlesCheck.Size = new System.Drawing.Size(149, 17);
-            this.puzzlesCheck.TabIndex = 23;
+            this.puzzlesCheck.TabIndex = 9;
             this.puzzlesCheck.Text = "Move puzzle items to Lara";
             this.puzzlesCheck.UseVisualStyleBackColor = true;
+            // 
+            // addFlaresCheck
+            // 
+            this.addFlaresCheck.AutoSize = true;
+            this.addFlaresCheck.Location = new System.Drawing.Point(217, 123);
+            this.addFlaresCheck.Name = "addFlaresCheck";
+            this.addFlaresCheck.Size = new System.Drawing.Size(73, 17);
+            this.addFlaresCheck.TabIndex = 11;
+            this.addFlaresCheck.Text = "Add flares";
+            this.addFlaresCheck.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -323,6 +334,7 @@ namespace TRSecretTester
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(547, 287);
+            this.Controls.Add(this.addFlaresCheck);
             this.Controls.Add(this.puzzlesCheck);
             this.Controls.Add(this.openDoorsCheck);
             this.Controls.Add(this.keyItemCheck);
@@ -379,6 +391,7 @@ namespace TRSecretTester
         private System.Windows.Forms.CheckBox keyItemCheck;
         private System.Windows.Forms.CheckBox openDoorsCheck;
         private System.Windows.Forms.CheckBox puzzlesCheck;
+        private System.Windows.Forms.CheckBox addFlaresCheck;
     }
 }
 

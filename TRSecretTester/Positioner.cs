@@ -36,6 +36,7 @@ namespace TRSecretTester
         public bool MoveKeyItems { get; set; }
         public bool MovePuzzleItems { get; set; }
         public bool OpenDoors { get; set; }
+        public bool AddFlares { get; set; }
         public StartPosition StartPos { get; set; }
         public int MatchEntityPosition { get; set; }
         public Location LaraCustomLocation { get; set; }
@@ -47,13 +48,14 @@ namespace TRSecretTester
             _config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("TRSecretTester.json"));
 
             string lvlPath = Path.Combine(DataFolder, LevelName);
-            if (_config.IsTR2Level(LevelName))
+            uint version = DetectVersion(lvlPath);
+            if (version == Versions.TR2)
             {
                 TR2Level level = new TR2LevelReader().ReadLevel(lvlPath);
                 Save(level);
                 new TR2LevelWriter().WriteLevelToFile(level, lvlPath);
             }
-            else if (_config.IsTR3Level(LevelName))
+            else if (version == Versions.TR3a || version == Versions.TR3b)
             {
                 TR3Level level = new TR3LevelReader().ReadLevel(lvlPath);
                 Save(level);
@@ -62,6 +64,14 @@ namespace TRSecretTester
             else
             {
                 throw new ArgumentException("Unrecognised level");
+            }
+        }
+
+        private uint DetectVersion(string path)
+        {
+            using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+            {
+                return reader.ReadUInt32();
             }
         }
 
@@ -110,6 +120,22 @@ namespace TRSecretTester
                     door.Flags = _allFlagBits;
                 }
             }
+
+            if (AddFlares)
+            {
+                TR2Entity flares = Array.Find(level.Entities, e => _config.TR2EntityRemovals.Contains(e.TypeID));
+                if (flares != null)
+                {
+                    TR2Entity lara = Array.Find(level.Entities, e => e.TypeID == (short)TR2Entities.Lara);
+                    flares.TypeID = (short)TR2Entities.Flares_S_P;
+                    flares.X = lara.X;
+                    flares.Y = lara.Y;
+                    flares.Z = lara.Z;
+                    flares.Room = lara.Room;
+                    flares.Flags = _allFlagBits;
+                    flares.Intensity1 = flares.Intensity1 = -1;
+                }
+            }
         }
 
         private void Save(TR3Level level)
@@ -156,6 +182,21 @@ namespace TRSecretTester
                 foreach (TR2Entity door in Array.FindAll(level.Entities, e => TR3EntityUtilities.IsTrapdoor((TR3Entities)e.TypeID) || TR3EntityUtilities.IsDoorType((TR3Entities)e.TypeID)))
                 {
                     door.Flags = _allFlagBits;
+                }
+            }
+
+            if (AddFlares)
+            {
+                TR2Entity flares = Array.Find(level.Entities, e => _config.TR3EntityRemovals.Contains(e.TypeID));
+                if (flares != null)
+                {
+                    TR2Entity lara = Array.Find(level.Entities, e => e.TypeID == (short)TR3Entities.Lara);
+                    flares.TypeID = (short)TR3Entities.Flares_P;
+                    flares.X = lara.X;
+                    flares.Y = lara.Y;
+                    flares.Z = lara.Z;
+                    flares.Room = lara.Room;
+                    flares.Flags = _allFlagBits;
                 }
             }
         }
