@@ -1,5 +1,5 @@
 # Tomb Raider Secret Tester
-Allows Lara's position to be manually set for TR2 and TR3 (for the purpose of testing secret locations mainly) by editing the level data files. Options also include opening all doors, and moving key/puzzle/flare items to Lara.
+Allows Lara's position to be manually set for TR1, TR2 and TR3 (for the purpose of testing secret locations mainly) by editing the level data files. Options also include opening all doors, and moving key/puzzle/flare items to Lara.
 
 ![image](https://user-images.githubusercontent.com/33758420/160288184-40295fc9-5d2e-4db6-8820-1549f292a387.png)
 

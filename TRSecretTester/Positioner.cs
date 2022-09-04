@@ -49,7 +49,13 @@ namespace TRSecretTester
 
             string lvlPath = Path.Combine(DataFolder, LevelName);
             uint version = DetectVersion(lvlPath);
-            if (version == Versions.TR2)
+            if (version == Versions.TR1)
+            {
+                TRLevel level = new TR1LevelReader().ReadLevel(lvlPath);
+                Save(level);
+                new TR1LevelWriter().WriteLevelToFile(level, lvlPath);
+            }
+            else if (version == Versions.TR2)
             {
                 TR2Level level = new TR2LevelReader().ReadLevel(lvlPath);
                 Save(level);
@@ -72,6 +78,53 @@ namespace TRSecretTester
             using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
             {
                 return reader.ReadUInt32();
+            }
+        }
+
+        private void Save(TRLevel level)
+        {
+            List<TREntity> entities = level.Entities.ToList();
+            MoveLara(entities, _config.TR1LaraPositions[LevelName]);
+
+            if (LimitEntities)
+            {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
+
+                LimitLevelEntities(entities, _config.TR1EntityRemovals, floorData);
+                level.Entities = entities.ToArray();
+                level.NumEntities = (uint)entities.Count;
+                floorData.WriteToLevel(level);
+            }
+
+            if (MoveKeyItems)
+            {
+                TREntity lara = Array.Find(level.Entities, e => e.TypeID == (short)TREntities.Lara);
+                foreach (TREntity ent in level.Entities)
+                {
+                    if (TR1EntityUtilities.IsKeyItemType((TREntities)ent.TypeID))
+                    {
+                        ent.X = lara.X;
+                        ent.Y = lara.Y;
+                        ent.Z = lara.Z;
+                        ent.Room = lara.Room;
+                        ent.Flags = _allFlagBits;
+                    }
+                }
+            }
+
+            if (OpenDoors)
+            {
+                bool pred(TREntity e) =>
+                    TR1EntityUtilities.IsDoorType((TREntities)e.TypeID) ||
+                    (TREntities)e.TypeID == TREntities.Trapdoor1 ||
+                    (TREntities)e.TypeID == TREntities.Trapdoor2 ||
+                    (TREntities)e.TypeID == TREntities.Trapdoor3;
+
+                foreach (TREntity door in Array.FindAll(level.Entities, pred))
+                {
+                    door.Flags = _allFlagBits;
+                }
             }
         }
 
@@ -224,6 +277,34 @@ namespace TRSecretTester
             return false;
         }
 
+        private void MoveLara(List<TREntity> entities, Location defaultLocation)
+        {
+            TREntity lara = entities.Find(e => e.TypeID == (short)TREntities.Lara);
+
+            if (StartPos == StartPosition.Default)
+            {
+                lara.X = defaultLocation.X;
+                lara.Y = defaultLocation.Y;
+                lara.Z = defaultLocation.Z;
+                lara.Room = (short)defaultLocation.Room;
+            }
+            else if (StartPos == StartPosition.Custom)
+            {
+                lara.X = LaraCustomLocation.X;
+                lara.Y = LaraCustomLocation.Y;
+                lara.Z = LaraCustomLocation.Z;
+                lara.Room = (short)LaraCustomLocation.Room;
+            }
+            else
+            {
+                TREntity otherPos = entities[MatchEntityPosition];
+                lara.X = otherPos.X;
+                lara.Y = otherPos.Y;
+                lara.Z = otherPos.Z;
+                lara.Room = otherPos.Room;
+            }
+        }
+
         private void MoveLara(List<TR2Entity> entities, Location defaultLocation)
         {
             TR2Entity lara = entities.Find(e => e.TypeID == (short)TR2Entities.Lara);
@@ -249,6 +330,62 @@ namespace TRSecretTester
                 lara.Y = otherPos.Y;
                 lara.Z = otherPos.Z;
                 lara.Room = otherPos.Room;
+            }
+        }
+
+        private void LimitLevelEntities(List<TREntity> entities, List<short> removeTypes, FDControl floorData)
+        {
+            if (LimitEntities && entities.Count > EntityLimit)
+            {
+                Dictionary<int, TREntity> oldPositions = new Dictionary<int, TREntity>();
+                Dictionary<TREntity, int> newPositions = new Dictionary<TREntity, int>();
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    oldPositions[i] = entities[i];
+                }
+
+                for (int i = entities.Count - 1; i >= 0; i--)
+                {
+                    if (entities.Count <= EntityLimit)
+                    {
+                        break;
+                    }
+
+                    if (removeTypes.Contains(entities[i].TypeID))
+                    {
+                        entities.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    newPositions[entities[i]] = i;
+                }
+
+                foreach (List<FDEntry> entryList in floorData.Entries.Values)
+                {
+                    foreach (FDEntry entry in entryList)
+                    {
+                        if (entry is FDTriggerEntry trigger)
+                        {
+                            for (int i = trigger.TrigActionList.Count - 1; i >= 0; i--)
+                            {
+                                FDActionListItem action = trigger.TrigActionList[i];
+                                if (_removeTriggerActions.Contains(action.TrigAction) && oldPositions.ContainsKey(action.Parameter))
+                                {
+                                    if (newPositions.ContainsKey(oldPositions[action.Parameter]))
+                                    {
+                                        action.Parameter = (ushort)newPositions[oldPositions[action.Parameter]];
+                                    }
+                                    else
+                                    {
+                                        trigger.TrigActionList.RemoveAt(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

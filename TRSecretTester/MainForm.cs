@@ -29,17 +29,29 @@ namespace TRSecretTester
                     foreach (string file in Directory.GetFiles(dlg.FileName))
                     {
                         string fileName = Path.GetFileName(file).ToUpper();
-                        if (fileName.Equals(TR2LevelNames.HOME)) continue; // ambiguous between TR2/3
-                        if (TR2LevelNames.AsListWithAssault.Contains(fileName))
+                        if (TRLevelNames.AsListWithAssault.Contains(fileName))
+                        {
+                            levelComboBox.Items.AddRange(TRLevelNames.AsListWithAssault.ToArray());
+                            levelComboBox.SelectedIndex = 0;
+                            addFlaresCheck.Enabled = false;
+                            break;
+                        }
+                        else if (fileName.Equals(TR2LevelNames.HOME))
+                        {
+                            continue; // ambiguous between TR2/3
+                        }
+                        else if (TR2LevelNames.AsListWithAssault.Contains(fileName))
                         {
                             levelComboBox.Items.AddRange(TR2LevelNames.AsListWithAssault.ToArray());
                             levelComboBox.SelectedIndex = 0;
+                            addFlaresCheck.Enabled = true;
                             break;
                         }
                         else if (TR3LevelNames.AsListWithAssault.Contains(fileName))
                         {
                             levelComboBox.Items.AddRange(TR3LevelNames.AsListWithAssault.ToArray());
                             levelComboBox.SelectedIndex = 0;
+                            addFlaresCheck.Enabled = true;
                             break;
                         }
                     }
@@ -141,7 +153,7 @@ namespace TRSecretTester
                 MoveKeyItems = keyItemCheck.Checked,
                 MovePuzzleItems = puzzlesCheck.Checked,
                 OpenDoors = openDoorsCheck.Checked,
-                AddFlares = addFlaresCheck.Checked,
+                AddFlares = addFlaresCheck.Enabled && addFlaresCheck.Checked,
                 StartPos = startPos,
                 MatchEntityPosition = Convert.ToInt32(entityPosSpinner.Value),
                 LaraCustomLocation = laraLocation
