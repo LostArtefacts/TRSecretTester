@@ -37,6 +37,7 @@ namespace TRSecretTester
         public bool MovePuzzleItems { get; set; }
         public bool OpenDoors { get; set; }
         public bool AddFlares { get; set; }
+        public bool NoEnemy { get; set; }
         public StartPosition StartPos { get; set; }
         public int MatchEntityPosition { get; set; }
         public Location LaraCustomLocation { get; set; }
@@ -189,6 +190,65 @@ namespace TRSecretTester
                     flares.Intensity1 = flares.Intensity1 = -1;
                 }
             }
+
+            if (NoEnemy)
+            {
+                FDControl floorDataEnemy = new FDControl();
+                floorDataEnemy.ParseFromLevel(level);
+
+                RemoveEnemies(entities, floorDataEnemy);
+                level.Entities = entities.ToArray();
+                level.NumEntities = (uint)entities.Count;
+                floorDataEnemy.WriteToLevel(level);
+            }
+        }
+
+        private void RemoveEnemies(List<TR2Entity> entities, FDControl floorData)
+        {           
+            Dictionary<int, TR2Entity> oldPositions = new Dictionary<int, TR2Entity>();
+            Dictionary<TR2Entity, int> newPositions = new Dictionary<TR2Entity, int>();
+            for (int i = 0; i < entities.Count; i++)
+            {
+                oldPositions[i] = entities[i];
+            }
+
+            for (int i = entities.Count - 1; i >= 0; i--)
+            {                             
+                if (TR2EntityUtilities.IsEnemyType((TR2Entities)entities[i].TypeID))
+                {
+                    entities.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                newPositions[entities[i]] = i;
+            }
+
+            foreach (List<FDEntry> entryList in floorData.Entries.Values)
+            {
+                foreach (FDEntry entry in entryList)
+                {
+                    if (entry is FDTriggerEntry trigger)
+                    {
+                        for (int i = trigger.TrigActionList.Count - 1; i >= 0; i--)
+                        {
+                            FDActionListItem action = trigger.TrigActionList[i];
+                            if (_removeTriggerActions.Contains(action.TrigAction) && oldPositions.ContainsKey(action.Parameter))
+                            {
+                                if (newPositions.ContainsKey(oldPositions[action.Parameter]))
+                                {
+                                    action.Parameter = (ushort)newPositions[oldPositions[action.Parameter]];
+                                }
+                                else
+                                {
+                                    trigger.TrigActionList.RemoveAt(i);
+                                }
+                            }
+                        }
+                    }
+                }
+            }    
         }
 
         private void Save(TR3Level level)

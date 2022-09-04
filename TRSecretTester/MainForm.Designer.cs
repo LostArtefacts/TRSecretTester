@@ -54,6 +54,7 @@ namespace TRSecretTester
             this.openDoorsCheck = new System.Windows.Forms.CheckBox();
             this.puzzlesCheck = new System.Windows.Forms.CheckBox();
             this.addFlaresCheck = new System.Windows.Forms.CheckBox();
+            this.noEnemyCheck = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.laraRoomSpinner)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.entityPosSpinner)).BeginInit();
@@ -328,6 +329,16 @@ namespace TRSecretTester
             this.addFlaresCheck.Text = "Add flares";
             this.addFlaresCheck.UseVisualStyleBackColor = true;
             // 
+            // NoEnemyCheck
+            // 
+            this.noEnemyCheck.AutoSize = true;
+            this.noEnemyCheck.Location = new System.Drawing.Point(300, 123);
+            this.noEnemyCheck.Name = "NoEnemyCheck";
+            this.noEnemyCheck.Size = new System.Drawing.Size(73, 17);
+            this.noEnemyCheck.TabIndex = 11;
+            this.noEnemyCheck.Text = "Remove Enemies";
+            this.noEnemyCheck.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -335,6 +346,7 @@ namespace TRSecretTester
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(547, 287);
             this.Controls.Add(this.addFlaresCheck);
+            this.Controls.Add(this.noEnemyCheck);
             this.Controls.Add(this.puzzlesCheck);
             this.Controls.Add(this.openDoorsCheck);
             this.Controls.Add(this.keyItemCheck);
@@ -392,6 +404,7 @@ namespace TRSecretTester
         private System.Windows.Forms.CheckBox openDoorsCheck;
         private System.Windows.Forms.CheckBox puzzlesCheck;
         private System.Windows.Forms.CheckBox addFlaresCheck;
+        private System.Windows.Forms.CheckBox noEnemyCheck;
     }
 }
 

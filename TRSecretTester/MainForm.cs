@@ -154,6 +154,7 @@ namespace TRSecretTester
                 MovePuzzleItems = puzzlesCheck.Checked,
                 OpenDoors = openDoorsCheck.Checked,
                 AddFlares = addFlaresCheck.Enabled && addFlaresCheck.Checked,
+                NoEnemy = noEnemyCheck.Checked,
                 StartPos = startPos,
                 MatchEntityPosition = Convert.ToInt32(entityPosSpinner.Value),
                 LaraCustomLocation = laraLocation
