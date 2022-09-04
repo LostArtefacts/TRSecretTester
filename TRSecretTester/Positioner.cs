@@ -134,6 +134,17 @@ namespace TRSecretTester
             List<TR2Entity> entities = level.Entities.ToList();
             MoveLara(entities, _config.TR2LaraPositions[LevelName]);
 
+            if (NoEnemy)
+            {
+                FDControl floorDataEnemy = new FDControl();
+                floorDataEnemy.ParseFromLevel(level);
+
+                RemoveEnemies(entities, floorDataEnemy);
+                level.Entities = entities.ToArray();
+                level.NumEntities = (uint)entities.Count;
+                floorDataEnemy.WriteToLevel(level);
+            }
+
             if (LimitEntities)
             {
                 FDControl floorData = new FDControl();
@@ -190,21 +201,10 @@ namespace TRSecretTester
                     flares.Intensity1 = flares.Intensity1 = -1;
                 }
             }
-
-            if (NoEnemy)
-            {
-                FDControl floorDataEnemy = new FDControl();
-                floorDataEnemy.ParseFromLevel(level);
-
-                RemoveEnemies(entities, floorDataEnemy);
-                level.Entities = entities.ToArray();
-                level.NumEntities = (uint)entities.Count;
-                floorDataEnemy.WriteToLevel(level);
-            }
         }
 
         private void RemoveEnemies(List<TR2Entity> entities, FDControl floorData)
-        {           
+        {
             Dictionary<int, TR2Entity> oldPositions = new Dictionary<int, TR2Entity>();
             Dictionary<TR2Entity, int> newPositions = new Dictionary<TR2Entity, int>();
             for (int i = 0; i < entities.Count; i++)
@@ -213,7 +213,7 @@ namespace TRSecretTester
             }
 
             for (int i = entities.Count - 1; i >= 0; i--)
-            {                             
+            {
                 if (TR2EntityUtilities.IsEnemyType((TR2Entities)entities[i].TypeID))
                 {
                     entities.RemoveAt(i);
@@ -248,7 +248,7 @@ namespace TRSecretTester
                         }
                     }
                 }
-            }    
+            }
         }
 
         private void Save(TR3Level level)
@@ -313,7 +313,7 @@ namespace TRSecretTester
                 }
             }
         }
-        
+
         private bool IsTR3Secret(TR2Entity entity, int entityIndex, TR3Level level, FDControl floorData)
         {
             Predicate<FDEntry> pred = new Predicate<FDEntry>
