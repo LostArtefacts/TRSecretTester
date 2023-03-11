@@ -157,7 +157,8 @@ namespace TRSecretTester
                 NoEnemy = noEnemyCheck.Checked,
                 StartPos = startPos,
                 MatchEntityPosition = Convert.ToInt32(entityPosSpinner.Value),
-                LaraCustomLocation = laraLocation
+                LaraCustomLocation = laraLocation,
+                VisibleSecretIndex = hideSecretsCheckBox.Checked ? Convert.ToInt32(visibleSecretSpinner.Value) : -1
             };
             sp.Save();
 
@@ -174,6 +175,11 @@ namespace TRSecretTester
         private void LimitEntitiesCheck_CheckedChanged(object sender, EventArgs e)
         {
             maxEntitiesSpinner.Enabled = limitEntitiesCheck.Checked;
+        }
+
+        private void HideSecretsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            visibleSecretSpinner.Enabled = hideSecretsCheckBox.Checked;
         }
     }
 }

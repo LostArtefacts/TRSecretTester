@@ -55,10 +55,13 @@ namespace TRSecretTester
             this.puzzlesCheck = new System.Windows.Forms.CheckBox();
             this.addFlaresCheck = new System.Windows.Forms.CheckBox();
             this.noEnemyCheck = new System.Windows.Forms.CheckBox();
+            this.hideSecretsCheckBox = new System.Windows.Forms.CheckBox();
+            this.visibleSecretSpinner = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.laraRoomSpinner)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.entityPosSpinner)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxEntitiesSpinner)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.visibleSecretSpinner)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -329,15 +332,39 @@ namespace TRSecretTester
             this.addFlaresCheck.Text = "Add flares";
             this.addFlaresCheck.UseVisualStyleBackColor = true;
             // 
-            // NoEnemyCheck
+            // noEnemyCheck
             // 
             this.noEnemyCheck.AutoSize = true;
             this.noEnemyCheck.Location = new System.Drawing.Point(300, 123);
-            this.noEnemyCheck.Name = "NoEnemyCheck";
-            this.noEnemyCheck.Size = new System.Drawing.Size(73, 17);
+            this.noEnemyCheck.Name = "noEnemyCheck";
+            this.noEnemyCheck.Size = new System.Drawing.Size(109, 17);
             this.noEnemyCheck.TabIndex = 11;
             this.noEnemyCheck.Text = "Remove Enemies";
             this.noEnemyCheck.UseVisualStyleBackColor = true;
+            // 
+            // hideSecretsCheckBox
+            // 
+            this.hideSecretsCheckBox.AutoSize = true;
+            this.hideSecretsCheckBox.Location = new System.Drawing.Point(300, 75);
+            this.hideSecretsCheckBox.Name = "hideSecretsCheckBox";
+            this.hideSecretsCheckBox.Size = new System.Drawing.Size(133, 17);
+            this.hideSecretsCheckBox.TabIndex = 16;
+            this.hideSecretsCheckBox.Text = "Hide all secrets except";
+            this.hideSecretsCheckBox.UseVisualStyleBackColor = true;
+            this.hideSecretsCheckBox.CheckedChanged += new System.EventHandler(this.HideSecretsCheckBox_CheckedChanged);
+            // 
+            // visibleSecretSpinner
+            // 
+            this.visibleSecretSpinner.Enabled = false;
+            this.visibleSecretSpinner.Location = new System.Drawing.Point(460, 75);
+            this.visibleSecretSpinner.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.visibleSecretSpinner.Name = "visibleSecretSpinner";
+            this.visibleSecretSpinner.Size = new System.Drawing.Size(65, 20);
+            this.visibleSecretSpinner.TabIndex = 17;
             // 
             // MainForm
             // 
@@ -345,6 +372,8 @@ namespace TRSecretTester
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(547, 287);
+            this.Controls.Add(this.visibleSecretSpinner);
+            this.Controls.Add(this.hideSecretsCheckBox);
             this.Controls.Add(this.addFlaresCheck);
             this.Controls.Add(this.noEnemyCheck);
             this.Controls.Add(this.puzzlesCheck);
@@ -373,6 +402,7 @@ namespace TRSecretTester
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.entityPosSpinner)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxEntitiesSpinner)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.visibleSecretSpinner)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -405,6 +435,8 @@ namespace TRSecretTester
         private System.Windows.Forms.CheckBox puzzlesCheck;
         private System.Windows.Forms.CheckBox addFlaresCheck;
         private System.Windows.Forms.CheckBox noEnemyCheck;
+        private System.Windows.Forms.CheckBox hideSecretsCheckBox;
+        private System.Windows.Forms.NumericUpDown visibleSecretSpinner;
     }
 }
 
