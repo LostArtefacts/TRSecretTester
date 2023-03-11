@@ -41,6 +41,7 @@ namespace TRSecretTester
         public StartPosition StartPos { get; set; }
         public int MatchEntityPosition { get; set; }
         public Location LaraCustomLocation { get; set; }
+        public int VisibleSecretIndex { get; set; }
 
         private Config _config;
 
@@ -87,6 +88,21 @@ namespace TRSecretTester
             List<TREntity> entities = level.Entities.ToList();
             MoveLara(entities, _config.TR1LaraPositions[LevelName]);
 
+            if (VisibleSecretIndex != -1)
+            {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    if (i != VisibleSecretIndex && TR1EntityUtilities.IsAnyPickupType((TREntities)entities[i].TypeID))
+                    {
+                        entities[i].TypeID = (short)TREntities.CameraTarget_N;
+                        FDUtilities.RemoveEntityTriggers(level, i, floorData);
+                    }
+                }
+                floorData.WriteToLevel(level);
+            }
+
             if (LimitEntities)
             {
                 FDControl floorData = new FDControl();
@@ -98,18 +114,24 @@ namespace TRSecretTester
                 floorData.WriteToLevel(level);
             }
 
-            if (MoveKeyItems)
+            if (MoveKeyItems || MovePuzzleItems)
             {
+                FDControl floorData = new FDControl();
+                floorData.ParseFromLevel(level);
                 TREntity lara = Array.Find(level.Entities, e => e.TypeID == (short)TREntities.Lara);
-                foreach (TREntity ent in level.Entities)
+                for (int i = 0; i < level.NumEntities; i++)
                 {
-                    if (TR1EntityUtilities.IsKeyItemType((TREntities)ent.TypeID))
+                    TREntity ent = level.Entities[i];
+                    TREntities type = (TREntities)ent.TypeID;
+                    if ((MoveKeyItems && TR1EntityUtilities.IsKeyType(type)) || (MovePuzzleItems && (TR1EntityUtilities.IsPuzzleType(type) || TR1EntityUtilities.IsQuestType(type))))
                     {
-                        ent.X = lara.X;
-                        ent.Y = lara.Y;
-                        ent.Z = lara.Z;
-                        ent.Room = lara.Room;
-                        ent.Flags = _allFlagBits;
+                        if (!IsTR1Secret(ent, i, level, floorData))
+                        {
+                            ent.X = lara.X;
+                            ent.Y = lara.Y;
+                            ent.Z = lara.Z;
+                            ent.Room = lara.Room;
+                        }
                     }
                 }
             }
@@ -133,6 +155,17 @@ namespace TRSecretTester
         {
             List<TR2Entity> entities = level.Entities.ToList();
             MoveLara(entities, _config.TR2LaraPositions[LevelName]);
+
+            if (VisibleSecretIndex != -1)
+            {
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    if (TR2EntityUtilities.IsSecretType((TR2Entities)entities[i].TypeID))
+                    {
+                        entities[i].Invisible = i != VisibleSecretIndex;
+                    }
+                }
+            }
 
             if (NoEnemy)
             {
@@ -312,6 +345,29 @@ namespace TRSecretTester
                     flares.Flags = _allFlagBits;
                 }
             }
+        }
+
+        private bool IsTR1Secret(TREntity entity, int entityIndex, TRLevel level, FDControl floorData)
+        {
+            Predicate<FDEntry> pred = new Predicate<FDEntry>
+            (
+                e =>
+                    e is FDTriggerEntry trig && trig.TrigType == FDTrigType.Pickup
+                 && trig.TrigActionList.Count > 1
+                 && trig.TrigActionList[0].TrigAction == FDTrigAction.Object
+                 && trig.TrigActionList[1].TrigAction == FDTrigAction.SecretFound
+            );
+
+            TRRoomSector sector = FDUtilities.GetRoomSector(entity.X, entity.Y, entity.Z, entity.Room, level, floorData);
+            if (sector.FDIndex != 0)
+            {
+                if (floorData.Entries[sector.FDIndex].Find(pred) is FDTriggerEntry trigger && trigger.TrigActionList[0].Parameter == entityIndex)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool IsTR3Secret(TR2Entity entity, int entityIndex, TR3Level level, FDControl floorData)
